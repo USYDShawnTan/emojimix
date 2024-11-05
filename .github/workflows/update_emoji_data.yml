@@ -1,12 +1,12 @@
-name: Update Emoji Data
+name: Update and Release Emoji Data
 
 on:
   schedule:
-    - cron: "0 0 * * *" # 每天 UTC 时间 0 点运行
-  workflow_dispatch: # 允许手动触发工作流
+    - cron: '0 0 * * *'  # 每天 UTC 时间 0 点运行
+  workflow_dispatch:     # 手动触发
 
 jobs:
-  update-emoji-data:
+  update-and-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.x"
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
@@ -25,12 +25,39 @@ jobs:
       - name: Run update script
         run: python update_emoji_data.py
 
+      - name: Check if file has changed
+        id: file_changed
+        run: |
+          if git diff --exit-code --quiet emojimix_data.json; then
+            echo "No changes in emojimix_data.json"
+            echo "file_changed=false" >> $GITHUB_ENV
+          else
+            echo "Changes detected in emojimix_data.json"
+            echo "file_changed=true" >> $GITHUB_ENV
+          fi
+
       - name: Commit and push changes
+        if: env.file_changed == 'true'
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add emojimix_data.json
           git commit -m "Update emoji data"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get current date
+        id: date
+        run: echo "release_date=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        if: env.file_changed == 'true'
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "v${{ env.release_date }}"  # 使用当天日期作为版本号
+          name: "Release v${{ env.release_date }}"
+          files: emojimix_data.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
