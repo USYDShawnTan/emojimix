@@ -1,0 +1,36 @@
+name: Update Emoji Data
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 每天 UTC 时间 0 点运行
+  workflow_dispatch: # 允许手动触发工作流
+
+jobs:
+  update-emoji-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Run update script
+        run: python update_emoji_data.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update emoji data"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
