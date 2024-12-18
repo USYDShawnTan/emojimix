@@ -90,8 +90,13 @@ def simplify_emoji_data(data):
             simplified_data["emojis"][str(date_index)] = []
         simplified_data["emojis"][str(date_index)].append(emoji_name)
 
-    print("数据已简化并按日期排序")
+    # 对每个日期下的 emoji 列表进行排序
+    for key in simplified_data["emojis"]:
+        simplified_data["emojis"][key].sort()
+
+    print("数据已简化并按日期升序排序，emoji 组也已排序")
     return simplified_data
+
 
 # 自动更新流程
 def main():
