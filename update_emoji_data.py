@@ -71,31 +71,31 @@ def reformat_urls(urls):
 
 def simplify_emoji_data(data):
     """进一步简化数据结构并按日期升序排序"""
-    unique_dates = sorted(list({emoji.split('/')[0] for emoji in data["emojis"]}))  # 按升序排序
+    # 获取并排序唯一日期
+    unique_dates = sorted(list({emoji.split('/')[0] for emoji in data["emojis"]}))
     date_index_map = {date: index for index, date in enumerate(unique_dates)}
-
+    
     simplified_data = {
         "baseUrl": data["baseUrl"],
         "dates": unique_dates,
         "emojis": {}
     }
-
+    
+    # 初始化所有索引的空列表
+    for i in range(len(unique_dates)):
+        simplified_data["emojis"][str(i)] = []
+    
+    # 使用新的索引映射存储数据
     for emoji_path in data["emojis"]:
         parts = emoji_path.split('/')
         date = parts[0]
         emoji_name = parts[-1]
         
-        date_index = date_index_map[date]
-        if str(date_index) not in simplified_data["emojis"]:
-            simplified_data["emojis"][str(date_index)] = []
-        simplified_data["emojis"][str(date_index)].append(emoji_name)
-
-    # 对每个日期下的 emoji 列表进行排序
-    for key in sorted(simplified_data["emojis"].keys(), key=int):
-        simplified_data["emojis"][key].sort()
-
-    print("数据已简化并按日期升序排序，emoji 组也已排序")
+        new_index = date_index_map[date]  # 使用新的索引映射
+        simplified_data["emojis"][str(new_index)].append(emoji_name)
+    
     return simplified_data
+
 
 # 自动更新流程
 def main():
