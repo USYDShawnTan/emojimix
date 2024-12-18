@@ -70,8 +70,8 @@ def reformat_urls(urls):
     return output_data
 
 def simplify_emoji_data(data):
-    """进一步简化数据结构"""
-    unique_dates = list({emoji.split('/')[0] for emoji in data["emojis"]})
+    """进一步简化数据结构并按日期升序排序"""
+    unique_dates = sorted(list({emoji.split('/')[0] for emoji in data["emojis"]}))  # 按升序排序
     date_index_map = {date: index for index, date in enumerate(unique_dates)}
 
     simplified_data = {
@@ -90,7 +90,7 @@ def simplify_emoji_data(data):
             simplified_data["emojis"][str(date_index)] = []
         simplified_data["emojis"][str(date_index)].append(emoji_name)
 
-    print("数据已简化")
+    print("数据已简化并按日期排序")
     return simplified_data
 
 # 自动更新流程
