@@ -40,62 +40,59 @@ def metadata_has_changed(content, hash_file_path):
 
 def extract_gStaticUrl(content):
     """提取 gStaticUrl 链接并返回链接列表"""
-    urls = re.findall(r'"gStaticUrl":"(https://www\.gstatic\.com/[^"]+)"', content)
+    data = json.loads(content)
+    urls = []
+    # 递归查找所有 gStaticUrl 键
+    def find_urls(obj):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if key == "gStaticUrl" and isinstance(value, str):
+                    urls.append(value)
+                elif isinstance(value, (dict, list)):
+                    find_urls(value)
+        elif isinstance(obj, list):
+            for item in obj:
+                find_urls(item)
+    
+    find_urls(data)
     print(f"共提取到 {len(urls)} 个链接")
     return urls
 
-def reformat_urls(urls):
-    """去重并筛选最新的日期"""
+def process_emoji_urls(urls):
+    """一次性处理 URL，直接生成最终简化的数据结构"""
     base_url = "https://www.gstatic.com/android/keyboard/emojikitchen/"
-    emojis = [url.replace(base_url, "") for url in urls]
-
+    
+    # 按日期和路径整理数据
     emoji_dict = {}
-    for emoji_path in emojis:
+    for url in urls:
+        emoji_path = url.replace(base_url, "")
         match = re.match(r"^(\d{8})/(.+)$", emoji_path)
         if match:
-            date, path = match.groups()
-            if path in emoji_dict:
-                if date > emoji_dict[path]["date"]:
-                    emoji_dict[path] = {"date": date, "path": emoji_path}
-            else:
-                emoji_dict[path] = {"date": date, "path": emoji_path}
-
-    unique_emojis = [item["path"] for item in emoji_dict.values()]
-
-    output_data = {
-        "baseUrl": base_url,
-        "emojis": unique_emojis
-    }
-    print("链接已去重并格式化")
-    return output_data
-
-def simplify_emoji_data(data):
-    """进一步简化数据结构并按日期升序排序"""
+            date, emoji_name = match.groups()
+            if emoji_name not in emoji_dict:
+                emoji_dict[emoji_name] = {"date": date, "path": emoji_path}
+            elif date > emoji_dict[emoji_name]["date"]:
+                emoji_dict[emoji_name] = {"date": date, "path": emoji_path}
+    
     # 获取并排序唯一日期
-    unique_dates = sorted(list({emoji.split('/')[0] for emoji in data["emojis"]}))
+    unique_dates = sorted(set(item["date"] for item in emoji_dict.values()))
     date_index_map = {date: index for index, date in enumerate(unique_dates)}
     
-    simplified_data = {
-        "baseUrl": data["baseUrl"],
+    # 构建最终数据结构
+    result = {
+        "baseUrl": base_url,
         "dates": unique_dates,
-        "emojis": {}
+        "emojis": {str(i): [] for i in range(len(unique_dates))}
     }
     
-    # 初始化所有索引的空列表
-    for i in range(len(unique_dates)):
-        simplified_data["emojis"][str(i)] = []
+    # 填充数据
+    for item in emoji_dict.values():
+        date = item["date"]
+        emoji_name = item["path"].split("/")[-1]
+        date_index = date_index_map[date]
+        result["emojis"][str(date_index)].append(emoji_name)
     
-    # 使用新的索引映射存储数据
-    for emoji_path in data["emojis"]:
-        parts = emoji_path.split('/')
-        date = parts[0]
-        emoji_name = parts[-1]
-        
-        new_index = date_index_map[date]  # 使用新的索引映射
-        simplified_data["emojis"][str(new_index)].append(emoji_name)
-    
-    return simplified_data
-
+    return result
 
 # 自动更新流程
 def main():
@@ -114,8 +111,7 @@ def main():
 
     # 如果文件有变化，继续执行以下处理
     urls = extract_gStaticUrl(content)
-    formatted_data = reformat_urls(urls)
-    simplified_data = simplify_emoji_data(formatted_data)
+    simplified_data = process_emoji_urls(urls)
 
     # 保存最终简化后的数据
     with open(output_path, 'w', encoding='utf-8') as output_file:
