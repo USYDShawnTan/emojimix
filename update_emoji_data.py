@@ -85,12 +85,14 @@ def process_emoji_urls(urls):
         "emojis": {str(i): [] for i in range(len(unique_dates))}
     }
     
-    # 填充数据
+    # 填充数据 - 去掉.png后缀
     for item in emoji_dict.values():
         date = item["date"]
         emoji_name = item["path"].split("/")[-1]
+        # 移除.png后缀
+        emoji_name_no_ext = emoji_name[:-4] if emoji_name.endswith(".png") else emoji_name
         date_index = date_index_map[date]
-        result["emojis"][str(date_index)].append(emoji_name)
+        result["emojis"][str(date_index)].append(emoji_name_no_ext)
     
     return result
 
