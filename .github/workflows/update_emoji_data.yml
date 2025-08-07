@@ -57,7 +57,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "v${{ env.release_date }}"
-          name: "Release v${{ env.release_date }} - ${{ env.release_time }}"
+          name: "Release v${{ env.release_date }}"
           body: |
             ## 🎨 EmojiMix Data Update
             
@@ -67,14 +67,8 @@ jobs:
             
             This release includes:
             
-            - **`emojimix_data.json`** - Original format (4.3 MB) - For development and debugging
-            - **`emojimix_data_compact.json`** - Compact format (2.4 MB) - For production use
-            
-            ### 🗜️ Compression Stats
-            
-            - **Original JSON:** 4.3 MB
-            - **Compact JSON:** 2.4 MB (44.5% smaller)
-            - **Space Saved:** ~1.9 MB
+            - **`emojimix_data.json`** - Original format (about 4 MB) - For development and debugging
+            - **`emojimix_data_compact.json`** - Compact format (about 2 MB) - For production use
             
             ### 🚀 Usage
             
