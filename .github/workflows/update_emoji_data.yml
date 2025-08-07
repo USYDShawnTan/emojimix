@@ -28,7 +28,7 @@ jobs:
       - name: Check if there are changes
         id: check_changes
         run: |
-          git add data/emojimix_data.json data/emojimix_data_compact.json data/metadata_hash.txt
+          git add -f data/emojimix_data.json data/emojimix_data_compact.json data/metadata_hash.txt
           git diff --cached --exit-code || echo "has_changes=true" >> $GITHUB_ENV
 
       - name: Commit and push changes

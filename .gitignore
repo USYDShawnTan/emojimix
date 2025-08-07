@@ -39,7 +39,8 @@ venv.bak/
 .DS_Store
 Thumbs.db
 
-# Project specific
+# Project specific - 本地开发时忽略数据文件
+# 注意：GitHub Actions会强制添加这些文件
 data/*.json
 data/metadata_hash.txt
 
