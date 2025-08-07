@@ -32,6 +32,11 @@ def metadata_has_changed(content, hash_file_path):
             print("metadata.json 文件没有变化")
             return False  # 没有变化
 
+    # 确保哈希文件目录存在
+    hash_dir = os.path.dirname(hash_file_path)
+    if hash_dir:
+        os.makedirs(hash_dir, exist_ok=True)
+
     # 若文件不存在或哈希值有变化，则更新哈希文件
     with open(hash_file_path, 'w') as hash_file:
         hash_file.write(current_hash)
