@@ -20,14 +20,13 @@ jobs:
       - name: Checkout current repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Checkout emoji-fusion repository
         uses: actions/checkout@v4
         with:
           repository: USYDShawnTan/emoji-fusion
-          # 使用PAT token如果有的话，否则使用默认token
-          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           path: emoji-fusion
 
       - name: Copy emojimix_data_compact.json
@@ -65,8 +64,7 @@ jobs:
           - Source: ${{ github.repository }}@${{ github.sha }}"
           git push
         env:
-          # 使用PAT token如果有的话，否则使用默认token
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: Success message
         if: env.has_changes == 'true'
